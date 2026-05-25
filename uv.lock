@@ -1,0 +1,17 @@
+version = 1
+requires-python = ">=3.14"
+
+[[package]]
+name = "opencv"
+version = "0.1.0"
+source = { virtual = "." }
+
+[package.dev-dependencies]
+dev = [
+    { name = "opencv" },
+]
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [{ name = "opencv", virtual = "." }]
