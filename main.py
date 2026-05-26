@@ -49,6 +49,10 @@ divider_x_at_out = get_lane_divider_x(line_y_out)
 divider_x_at_in = get_lane_divider_x(line_y_in)
 window_name = "Yolo car cout"
 
+class_count_in = {}
+class_count_out = {}
+crossed_in_ids = set()
+crossed_out_ids = set()
 
 # Load YOLO Model
 model = YOLO('yolo12l.pt')
@@ -101,6 +105,8 @@ while cap.isOpened():
         # map class name with class list dict
         class_name = class_list[class_idx]
 
+        divider_x_at_vehicle = get_lane_divider_x(center_y)
+
         # track center of object
         cv.circle(frame, (center_x, center_y), 4, (0, 0, 255), -1   )
 
@@ -108,9 +114,35 @@ while cap.isOpened():
         
         cv.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
     
+        # check ฝั่งขาเข้า
+        if center_x > divider_x_at_vehicle and center_y < line_y_in and track_id not in crossed_in_ids:
+            crossed_in_ids.add(track_id)
+            class_count_in[class_name] = class_count_in.get(class_name, 0) + 1
+
+        # check ฝั่งขวาออก
+        if center_x < divider_x_at_vehicle and center_y > line_y_in and track_id not in crossed_out_ids:
+            crossed_out_ids.add(track_id)
+            class_count_out[class_name] = class_count_out.get(class_name, 0) + 1
+    
+    # Display the counts on the frame
+    y_offset = 30
+    cv.putText(frame, "Vehicle (In):", (50, y_offset), cv.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+    y_offset += 25
+    
+    for class_name, count in class_count_in.items():
+        cv.putText(frame, f"{class_name}: {count}", (70, y_offset), cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+        y_offset += 25
+        
+    y_offset += 10
+    cv.putText(frame, "Vehicles (Out):", (50, y_offset), cv.FONT_HERSHEY_SIMPLEX, 0.7, (255, 0, 255), 2)
+    y_offset += 25
+    for class_name, count in class_count_out.items():
+        cv.putText(frame, f"{class_name}: {count}", (70, y_offset), cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 255), 2)
+        y_offset += 25
+    
     scaled_frame = cv.resize(frame, (new_width, new_height))
     cv.imshow(window_name, scaled_frame)
-    if cv.waitKey(0) & 0xFF == ord('q'):
+    if cv.waitKey(1) & 0xFF == ord('q'):
         break
 
 cap.release()
