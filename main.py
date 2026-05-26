@@ -70,7 +70,15 @@ while cap.isOpened():
     new_height = int(frame.shape[0] * ratio)
     new_width = int(frame.shape[1] * ratio)
     
+    # draw lines in frame
     draw_sloped_lane_divider(frame, y_start=700, y_end=frame.shape[0])
+    # left
+    cv.line(frame, (0, line_y_out), (divider_x_at_out, line_y_out), (0, 0, 255), 3)
+    cv.putText(frame, "Out lane", (700, line_y_out - 10), cv.FONT_HERSHEY_SIMPLEX, 1.5 ,(0, 0, 255), 3)
+    
+    # right
+    cv.line(frame, (divider_x_at_in, line_y_in), (frame.shape[1], line_y_in), (0, 255, 255), 3)
+    cv.putText(frame, "In lane", (frame.shape[1] - 550, line_y_in + 40), cv.FONT_HERSHEY_SIMPLEX, 1.5 ,(0, 255, 255), 3)
     
     # persist True = แทรกตัววัตถุไปเรื่อยๆ
     results = model.track(frame, persist=True, classes=[2, 7], device='cpu', verbose=False)
