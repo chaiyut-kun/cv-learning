@@ -1,13 +1,14 @@
 import cv2 as cv
 from ultralytics import YOLO
+from utils import get_coord_origin, get_lane_divider_x
 
 lane_points = []
 # mouse callback function to get image coordinate
 def mouse_callback(event, x, y, flags, param):
     if event == cv.EVENT_LBUTTONDOWN:
         # convert scaled coordinates to original
-        orgin_x = int(x / ratio)
-        orgin_y = int(y / ratio)
+        orgin_x = get_coord_origin(x, ratio)
+        orgin_y = get_coord_origin(y,)
         print(f"Mouse clicked at: X={orgin_x}, Y={orgin_y}")
         lane_points.append((orgin_x, orgin_y))
         
@@ -28,16 +29,10 @@ def mouse_callback(event, x, y, flags, param):
             # reset ค่าสำหรับคำนวณครั้งถัดไป
             lane_points.clear()
 
-def get_lane_divider_x(y):
-    """Draw sloped lane divider based on curb"""
-    return int(lane_divider_slope * y + lane_divider_intercept)
-    # สมการเส้นตรง y = mx + B (เคสนี้คือ x = my + B)
-
 def draw_sloped_lane_divider(frame, y_start, y_end):
     x_start = get_lane_divider_x(y_start)
     x_end = get_lane_divider_x(y_end)
     cv.line(frame, (x_start, y_start), (x_end, y_end), (255,0,255), 3)
-
 
 # config
 ratio = 0.3
@@ -59,7 +54,7 @@ model = YOLO('yolo12l.pt')
 class_list = model.names
 
 # อ่าน vdo
-cap = cv.VideoCapture('vehicle-count.mp4')
+cap = cv.VideoCapture('assets/vehicle-count.mp4')
 cv.namedWindow(window_name)
 cv.setMouseCallback(window_name, mouse_callback)
 
