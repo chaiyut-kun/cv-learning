@@ -58,9 +58,18 @@ while cap.isOpened():
         confidences = result.conf.cpu()
         
     for box, track_id, class_idx, conf in zip(boxes, track_ids, class_indices, confidences):
+        # split coordinates
         x1, y1, x2, y2 = map(int, box)
-
+        
+        # config center of object
+        center_x = (x1 + x2) // 2
+        center_y = (y1 + y2) // 2
+        # map class name with class list dict
         class_name = class_list[class_idx]
+
+        # track center of object
+        cv.circle(frame, (center_x, center_y), 4, (0, 0, 255), -1)
+
         cv.putText(frame, f"ID: {track_id} - {class_name}", (x1, y1 - 10), cv.FONT_HERSHEY_COMPLEX, 1, (0, 255, 255))
         
         cv.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
